@@ -1021,6 +1021,16 @@
 
     <string name="focus_bracketing_auto_source_distance">自動來源</string>
 
+    <!-- PRESET-4: 預設列字串（fork 新增）；跟隨系統語言 -->
+    <string name="preset_box_name">控箱%1$d</string>
+    <string name="preset_not_set_label">未設定</string>
+    <string name="preset_add">＋\n新增</string>
+    <string name="preset_pill">預設 ▶</string>
+    <string name="preset_not_set_toast">%1$s 尚未設定：先手動調好 ISO／曝光，再長按此鈕存入</string>
+    <string name="preset_applied_toast">%1$s：%2$s</string>
+    <string name="preset_auto_iso_toast">目前是自動 ISO：請先切成手動 ISO 並調好曝光，再長按存入</string>
+    <string name="preset_saved_toast">已存入 %1$s：%2$s</string>
+
     <string name="preference_allow_haptic_feedback">允許震動回饋</string>
     <string name="preference_allow_haptic_feedback_summary">是否允許觸覺震動回饋，例如調整某些控制時。注意這也需要在裝置設定中啟用觸覺回饋。</string>
 </resources>

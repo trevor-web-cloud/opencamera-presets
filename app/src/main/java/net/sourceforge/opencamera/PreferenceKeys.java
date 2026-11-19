@@ -93,6 +93,14 @@ public class PreferenceKeys {
 
     public static final String ExposureTimePreferenceKey = "preference_exposure_time";
 
+    // PRESET-1: on-screen preset bar （控箱 presets) - see ui/PresetBar.java
+    public static final String PresetCountPreferenceKey = "preference_preset_count";
+    public static final String PresetBarCollapsedPreferenceKey = "preference_preset_bar_collapsed";
+    public static final String PresetActivePreferenceKey = "preference_preset_active";
+    public static final String PresetNamePreferenceKeyPrefix = "preference_preset_name_";
+    public static final String PresetISOPreferenceKeyPrefix = "preference_preset_iso_";
+    public static final String PresetExposureTimePreferenceKeyPrefix = "preference_preset_exposure_time_";
+
     public static final String RawPreferenceKey = "preference_raw";
 
     public static final String AllowRawForExpoBracketingPreferenceKey = "preference_raw_expo_bracketing";

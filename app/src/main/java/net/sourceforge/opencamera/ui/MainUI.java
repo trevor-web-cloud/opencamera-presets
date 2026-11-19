@@ -610,6 +610,45 @@ public class MainUI {
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
+            // PRESET-1: preset bar （控箱 presets) - docked along the bottom edge of the
+            // screen (real, non-rotated rules: the bar must stay readable in both
+            // orientations); in portrait it sits above the shutter row, in landscape
+            // it leaves room on the right for the shutter column. Buttons are built
+            // by PresetBar.
+            {
+                View preset_bar = main_activity.findViewById(R.id.preset_bar);
+                if( preset_bar != null ) {
+                    PresetBar.build(main_activity);
+                    RelativeLayout.LayoutParams preset_layoutParams = (RelativeLayout.LayoutParams)preset_bar.getLayoutParams();
+                    preset_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+                    preset_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+                    preset_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+                    preset_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+                    int preset_margin_bottom = (int)((system_orientation_portrait ? 118 : 14) * scale + 0.5f);
+                    int preset_margin_right = (int)((system_orientation_portrait ? 8 : 128) * scale + 0.5f);
+                    int preset_margin_left = (int)(8 * scale + 0.5f);
+                    preset_layoutParams.setMargins(preset_margin_left, 0, preset_margin_right, preset_margin_bottom + navigation_gap);
+                    preset_bar.setLayoutParams(preset_layoutParams);
+                    // PRESET-3: collapsed pill docked at the top, just below the
+                    // top toolbar (in the black band above the preview in
+                    // portrait); visibility of bar vs pill is handled by
+                    // PresetBar.refreshVisibility()
+                    View preset_pill = main_activity.findViewById(R.id.preset_pill);
+                    if( preset_pill != null ) {
+                        RelativeLayout.LayoutParams pill_layoutParams = (RelativeLayout.LayoutParams)preset_pill.getLayoutParams();
+                        pill_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+                        pill_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+                        pill_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+                        pill_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+                        int pill_margin_top = (int)(72 * scale + 0.5f);
+                        int pill_margin_left = (int)(8 * scale + 0.5f);
+                        pill_layoutParams.setMargins(pill_margin_left, pill_margin_top, 0, 0);
+                        preset_pill.setLayoutParams(pill_layoutParams);
+                    }
+                    PresetBar.refreshVisibility(main_activity);
+                }
+            }
+
             view = main_activity.findViewById(R.id.switch_camera);
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(align_parent_left, 0);

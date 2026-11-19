@@ -1114,4 +1114,14 @@
             <li>Various other improvements and bug fixes.\n</li>
         </ul>
     </string>
+
+    <!-- PRESET-4: preset bar strings (fork addition); follow the system language -->
+    <string name="preset_box_name">Box %1$d</string>
+    <string name="preset_not_set_label">Not set</string>
+    <string name="preset_add">+\nAdd</string>
+    <string name="preset_pill">Presets ▶</string>
+    <string name="preset_not_set_toast">%1$s is not set yet: set ISO/exposure manually first, then long-press this button to save</string>
+    <string name="preset_applied_toast">%1$s: %2$s</string>
+    <string name="preset_auto_iso_toast">ISO is set to Auto: switch to a manual ISO and set the exposure first, then long-press to save</string>
+    <string name="preset_saved_toast">Saved to %1$s: %2$s</string>
 </resources>
