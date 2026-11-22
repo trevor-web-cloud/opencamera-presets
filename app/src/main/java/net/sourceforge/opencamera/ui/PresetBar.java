@@ -241,120 +241,122 @@ public class PresetBar {
     }
 
     // ------------------------------------------------------------------
-    // PRESET-5: guided calibration re-shoot wizard.
+    // PRESET-6: guided calibration re-shoot wizard (revised from PRESET-5
+    // after on-device feedback).
     //
-    // Purpose: after changing phones, the saved ISO + exposure presets no
-    // longer guarantee the same OCR photo quality (different sensor, lens
-    // and image processing). The wizard walks through every preset that
-    // has saved values and, for each one, steps the exposure time through
-    // a fixed bracket around the saved value (saved, +1/2 EV, +1 EV,
-    // -1/2 EV, -1 EV) while the ISO stays at the saved value. The user
-    // frames and shoots one photo per step, then taps the top banner to
-    // advance. The resulting batch can be compared against the old
-    // phone's golden set to pick the best values per preset, which are
-    // then re-saved with the usual long-press.
+    // Purpose: after changing phones, the previously used ISO + exposure
+    // values no longer guarantee the same OCR photo quality (different
+    // sensor, lens and image processing). The wizard brackets the
+    // exposure time around an adjustable base so the resulting batch can
+    // be compared against the old phone's golden set.
     //
-    // The wizard is deliberately manual (no auto-capture): the user keeps
-    // control of framing for every shot, and the app only changes the
-    // exposure step and tracks progress. State lives in SharedPreferences
-    // so it survives rotation and activity restarts. Leaving the wizard
-    // (finish or long-press on the banner) always restores the current
-    // preset's exact saved values.
+    // Feedback-driven design (PRESET-6):
+    //  - No preset (box) name is designated: the wizard is a single run,
+    //    not a walk through named presets.
+    //  - The base is adjustable: the wizard starts from the CURRENT
+    //    manual ISO + exposure time, and at any point the user can dial
+    //    new values with the app's normal exposure controls and tap the
+    //    "set as base" button to re-base the remaining steps.
+    // Steps: saved base, +1/2 EV, +1 EV, -1/2 EV, -1 EV (exposure-time
+    // factors x1, x1.41, x2, x0.71, x0.5); ISO stays at the base value.
+    // The user frames and shoots one photo per step, then taps the top
+    // banner to advance. Capture is deliberately manual. State lives in
+    // SharedPreferences so it survives rotation and restarts. Leaving the
+    // wizard restores the settings as they were when it was started.
     // ------------------------------------------------------------------
 
     private static final double[] CALIB_FACTORS = {1.0, 1.41421356, 2.0, 0.70710678, 0.5};
     private static final int CALIB_STEPS = CALIB_FACTORS.length;
 
-    private static int firstCalibBox(SharedPreferences prefs, int from) {
-        int count = getPresetCount(prefs);
-        for( int i = Math.max(from, 0); i < count; i++ ) {
-            if( hasPreset(prefs, i) )
-                return i;
-        }
-        return -1;
-    }
-
     private static void startCalibration(MainActivity activity) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        int box = firstCalibBox(prefs, 0);
-        if( box < 0 ) {
+        String iso = prefs.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
+        if( iso.equals(CameraController.ISO_DEFAULT) ) {
             if( activity.getPreview() != null )
-                activity.getPreview().showToast(null, activity.getString(R.string.preset_calib_none_toast), 0, true);
+                activity.getPreview().showToast(null, activity.getString(R.string.preset_auto_iso_toast), 0, true);
             return;
         }
+        long exposure_time = prefs.getLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(PreferenceKeys.PresetCalibActivePreferenceKey, true);
-        editor.putInt(PreferenceKeys.PresetCalibBoxPreferenceKey, box);
         editor.putInt(PreferenceKeys.PresetCalibStepPreferenceKey, 0);
+        editor.putString(PreferenceKeys.PresetCalibBaseISOPreferenceKey, iso);
+        editor.putLong(PreferenceKeys.PresetCalibBaseExposurePreferenceKey, exposure_time);
+        editor.putString(PreferenceKeys.PresetCalibOrigISOPreferenceKey, iso);
+        editor.putLong(PreferenceKeys.PresetCalibOrigExposurePreferenceKey, exposure_time);
         // collapse the bar so only the banner and the preview stay visible
         editor.putBoolean(PreferenceKeys.PresetBarCollapsedPreferenceKey, true);
         editor.apply();
         if( MyDebug.LOG )
-            Log.d(TAG, "calibration started at preset " + box);
+            Log.d(TAG, "calibration started: base iso=" + iso + " exposure_time=" + exposure_time);
         applyCalibStep(activity);
         build(activity);
     }
 
     private static void applyCalibStep(MainActivity activity) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        int box = prefs.getInt(PreferenceKeys.PresetCalibBoxPreferenceKey, 0);
         int step = prefs.getInt(PreferenceKeys.PresetCalibStepPreferenceKey, 0);
-        String iso = prefs.getString(PreferenceKeys.PresetISOPreferenceKeyPrefix + box, CameraController.ISO_DEFAULT);
-        long base_exposure = prefs.getLong(PreferenceKeys.PresetExposureTimePreferenceKeyPrefix + box, CameraController.EXPOSURE_TIME_DEFAULT);
+        String iso = prefs.getString(PreferenceKeys.PresetCalibBaseISOPreferenceKey, CameraController.ISO_DEFAULT);
+        long base_exposure = prefs.getLong(PreferenceKeys.PresetCalibBaseExposurePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
         long exposure_time = Math.max(1L, Math.round(base_exposure * CALIB_FACTORS[step]));
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PreferenceKeys.ISOPreferenceKey, iso);
         editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, exposure_time);
-        editor.putInt(PreferenceKeys.PresetActivePreferenceKey, box);
         editor.apply();
         if( MyDebug.LOG )
-            Log.d(TAG, "calibration preset " + box + " step " + step + ": iso=" + iso + " exposure_time=" + exposure_time);
+            Log.d(TAG, "calibration step " + step + ": iso=" + iso + " exposure_time=" + exposure_time);
         activity.updateForSettings(true, ""); // empty toast: the banner shows the step
         refreshCalibBanner(activity);
     }
 
     private static void advanceCalibration(MainActivity activity) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        int box = prefs.getInt(PreferenceKeys.PresetCalibBoxPreferenceKey, 0);
         int step = prefs.getInt(PreferenceKeys.PresetCalibStepPreferenceKey, 0) + 1;
-        SharedPreferences.Editor editor = prefs.edit();
         if( step >= CALIB_STEPS ) {
-            int next_box = firstCalibBox(prefs, box + 1);
-            if( next_box < 0 ) {
-                editor.apply();
-                endCalibration(activity, true);
-                return;
-            }
-            editor.putInt(PreferenceKeys.PresetCalibBoxPreferenceKey, next_box);
-            editor.putInt(PreferenceKeys.PresetCalibStepPreferenceKey, 0);
+            endCalibration(activity, true);
+            return;
         }
-        else {
-            editor.putInt(PreferenceKeys.PresetCalibStepPreferenceKey, step);
-        }
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(PreferenceKeys.PresetCalibStepPreferenceKey, step);
         editor.apply();
         applyCalibStep(activity);
     }
 
+    /** PRESET-6: re-base the wizard on the values currently dialed in with
+     *  the app's normal exposure controls, so the base stays adjustable. */
+    private static void rebaseCalibration(MainActivity activity) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        String iso = prefs.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
+        if( iso.equals(CameraController.ISO_DEFAULT) ) {
+            if( activity.getPreview() != null )
+                activity.getPreview().showToast(null, activity.getString(R.string.preset_auto_iso_toast), 0, true);
+            return;
+        }
+        long exposure_time = prefs.getLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PreferenceKeys.PresetCalibBaseISOPreferenceKey, iso);
+        editor.putLong(PreferenceKeys.PresetCalibBaseExposurePreferenceKey, exposure_time);
+        editor.apply();
+        if( MyDebug.LOG )
+            Log.d(TAG, "calibration re-based: iso=" + iso + " exposure_time=" + exposure_time);
+        applyCalibStep(activity);
+        if( activity.getPreview() != null ) {
+            String exp_string = activity.getPreview().getExposureTimeString(exposure_time);
+            activity.getPreview().showToast(null, activity.getString(R.string.preset_calib_rebased_toast, iso, exp_string), 0, true);
+        }
+    }
+
     private static void endCalibration(MainActivity activity, boolean finished) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        int box = prefs.getInt(PreferenceKeys.PresetCalibBoxPreferenceKey, 0);
-        // restore the current preset's exact saved values
-        if( hasPreset(prefs, box) ) {
-            String iso = prefs.getString(PreferenceKeys.PresetISOPreferenceKeyPrefix + box, CameraController.ISO_DEFAULT);
-            long exposure_time = prefs.getLong(PreferenceKeys.PresetExposureTimePreferenceKeyPrefix + box, CameraController.EXPOSURE_TIME_DEFAULT);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString(PreferenceKeys.ISOPreferenceKey, iso);
-            editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, exposure_time);
-            editor.putInt(PreferenceKeys.PresetActivePreferenceKey, box);
-            editor.putBoolean(PreferenceKeys.PresetCalibActivePreferenceKey, false);
-            editor.apply();
-            activity.updateForSettings(true, "");
-        }
-        else {
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean(PreferenceKeys.PresetCalibActivePreferenceKey, false);
-            editor.apply();
-        }
+        // restore the settings as they were when the wizard was started
+        String iso = prefs.getString(PreferenceKeys.PresetCalibOrigISOPreferenceKey, CameraController.ISO_DEFAULT);
+        long exposure_time = prefs.getLong(PreferenceKeys.PresetCalibOrigExposurePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PreferenceKeys.ISOPreferenceKey, iso);
+        editor.putLong(PreferenceKeys.ExposureTimePreferenceKey, exposure_time);
+        editor.putBoolean(PreferenceKeys.PresetCalibActivePreferenceKey, false);
+        editor.apply();
+        activity.updateForSettings(true, "");
         if( MyDebug.LOG )
             Log.d(TAG, "calibration ended, finished=" + finished);
         if( activity.getPreview() != null )
@@ -363,54 +365,79 @@ public class PresetBar {
         build(activity);
     }
 
-    /** PRESET-5: syncs the top calibration banner (R.id.calib_banner) with the
-     *  persisted wizard state. Tap = next step, long-press = end and restore. */
+    /** PRESET-6: syncs the top calibration banner (R.id.calib_banner) and the
+     *  "set as base" button (R.id.calib_rebase) with the persisted wizard
+     *  state. Banner tap = next step, banner long-press = end and restore. */
     public static void refreshCalibBanner(final MainActivity activity) {
         Button banner = activity.findViewById(R.id.calib_banner);
-        if( banner == null )
-            return;
+        Button rebase = activity.findViewById(R.id.calib_rebase);
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         boolean active = prefs.getBoolean(PreferenceKeys.PresetCalibActivePreferenceKey, false);
         if( !active ) {
-            banner.setVisibility(View.GONE);
+            if( banner != null )
+                banner.setVisibility(View.GONE);
+            if( rebase != null )
+                rebase.setVisibility(View.GONE);
             return;
         }
-        int box = prefs.getInt(PreferenceKeys.PresetCalibBoxPreferenceKey, 0);
         int step = prefs.getInt(PreferenceKeys.PresetCalibStepPreferenceKey, 0);
-        String iso = prefs.getString(PreferenceKeys.PresetISOPreferenceKeyPrefix + box, CameraController.ISO_DEFAULT);
-        long base_exposure = prefs.getLong(PreferenceKeys.PresetExposureTimePreferenceKeyPrefix + box, CameraController.EXPOSURE_TIME_DEFAULT);
+        String iso = prefs.getString(PreferenceKeys.PresetCalibBaseISOPreferenceKey, CameraController.ISO_DEFAULT);
+        long base_exposure = prefs.getLong(PreferenceKeys.PresetCalibBaseExposurePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
         long exposure_time = Math.max(1L, Math.round(base_exposure * CALIB_FACTORS[step]));
         String exp_string = activity.getPreview() != null ? activity.getPreview().getExposureTimeString(exposure_time) : "";
         String[] step_labels = activity.getResources().getStringArray(R.array.preset_calib_step_labels);
         String step_label = step < step_labels.length ? step_labels[step] : "";
         float scale = activity.getResources().getDisplayMetrics().density;
-        banner.setAllCaps(false);
-        banner.setTextColor(Color.WHITE);
-        banner.setTextSize(13);
-        banner.setMinHeight(0);
-        banner.setMinimumHeight(0);
-        int pad_x = (int)(10 * scale + 0.5f);
-        int pad_y = (int)(5 * scale + 0.5f);
-        banner.setPadding(pad_x, pad_y, pad_x, pad_y);
-        GradientDrawable bg = new GradientDrawable();
-        bg.setCornerRadius(8 * scale);
-        bg.setColor(0xCC1565C0);
-        banner.setBackground(bg);
-        banner.setText(activity.getString(R.string.preset_calib_banner,
-                getPresetName(activity, prefs, box), step + 1, CALIB_STEPS, iso, exp_string, step_label));
-        banner.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                advanceCalibration(activity);
-            }
-        });
-        banner.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                endCalibration(activity, false);
-                return true;
-            }
-        });
-        banner.setVisibility(View.VISIBLE);
+        if( banner != null ) {
+            banner.setAllCaps(false);
+            banner.setTextColor(Color.WHITE);
+            banner.setTextSize(13);
+            banner.setMinHeight(0);
+            banner.setMinimumHeight(0);
+            int pad_x = (int)(10 * scale + 0.5f);
+            int pad_y = (int)(5 * scale + 0.5f);
+            banner.setPadding(pad_x, pad_y, pad_x, pad_y);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(8 * scale);
+            bg.setColor(0xCC1565C0);
+            banner.setBackground(bg);
+            banner.setText(activity.getString(R.string.preset_calib_banner,
+                    step + 1, CALIB_STEPS, iso, exp_string, step_label));
+            banner.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    advanceCalibration(activity);
+                }
+            });
+            banner.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    endCalibration(activity, false);
+                    return true;
+                }
+            });
+            banner.setVisibility(View.VISIBLE);
+        }
+        if( rebase != null ) {
+            rebase.setAllCaps(false);
+            rebase.setTextColor(Color.WHITE);
+            rebase.setTextSize(13);
+            rebase.setMinHeight(0);
+            rebase.setMinimumHeight(0);
+            int pad_x = (int)(10 * scale + 0.5f);
+            int pad_y = (int)(3 * scale + 0.5f);
+            rebase.setPadding(pad_x, pad_y, pad_x, pad_y);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(8 * scale);
+            bg.setColor(0xB3000000);
+            rebase.setBackground(bg);
+            rebase.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    rebaseCalibration(activity);
+                }
+            });
+            rebase.setVisibility(View.VISIBLE);
+        }
     }
 }

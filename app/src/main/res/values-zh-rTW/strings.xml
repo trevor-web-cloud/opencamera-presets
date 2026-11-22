@@ -1031,10 +1031,11 @@
     <string name="preset_auto_iso_toast">目前是自動 ISO：請先切成手動 ISO 並調好曝光，再長按存入</string>
     <string name="preset_saved_toast">已存入 %1$s：%2$s</string>
     <string name="preset_calibrate">校準</string>
-    <string name="preset_calib_none_toast">尚無任何控箱存有數值：請先長按任一控箱鈕存入數值</string>
-    <string name="preset_calib_banner">%1$s · 第 %2$d/%3$d 張\nISO %4$s ·%5$s（%6$s）\n拍好後點此列進下一張（長按結束）</string>
+    <string name="preset_calib_banner">第 %1$d/%2$d 張\nISO %3$s ·%4$s（%5$s）\n拍好後點此列進下一張（長按結束）</string>
     <string name="preset_calib_done_toast">校準拍攝完成：請把這段時間拍的照片整批傳送</string>
-    <string name="preset_calib_ended_toast">已結束校準：已還原控箱原值</string>
+    <string name="preset_calib_ended_toast">已結束校準：已還原開始前的設定</string>
+    <string name="preset_calib_rebase">設為基準</string>
+    <string name="preset_calib_rebased_toast">新基準：ISO %1$s ·%2$s</string>
     <string-array name="preset_calib_step_labels">
         <item>原值</item>
         <item>+0.5 EV</item>

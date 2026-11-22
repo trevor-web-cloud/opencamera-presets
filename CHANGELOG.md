@@ -3,6 +3,11 @@
 All notable changes to this fork. Upstream base: Open Camera 1.56.2 (commit 0dd4cbe).
 Dates are Asia/Taipei.
 
+## 1.56.2-preset6-release — 2026-11-22 (versionCode 103)
+
+- Calibration wizard revised after on-device feedback: (1) no preset (box) name is designated any more — the wizard is a single run, not a walk through named presets, and the banner no longer shows a preset name; (2) the bracket base is adjustable — the wizard starts from the current manual ISO + exposure time (Auto ISO is rejected with a hint), and a new "Set as base" button below the banner re-bases the remaining steps on whatever values are currently dialed in with the normal exposure controls. Ending the wizard restores the settings as they were when it started.
+- Security pass: permission set and exported components identical to preset5-release, debuggable off, same release key, no sensitive APIs in the changed code, secret and de-identification scans clean, APK URL set unchanged.
+
 ## 1.56.2-preset5-release — 2026-11-22 (versionCode 102)
 
 - New: guided calibration re-shoot wizard for phone changes. A "Calibrate" button at the end of the preset bar walks through every preset that has saved values: ISO stays at the saved value while the exposure time steps through a fixed bracket (saved value, +0.5 EV, +1 EV, -0.5 EV, -1 EV; five shots per preset). A banner below the top pill shows the current preset and step; tap it to advance after each shot, long-press to end. Finishing or ending always restores the preset's exact saved values. Wizard state persists across rotation/restarts. Capture stays manual on purpose: the photographer keeps framing control for every shot, the app only changes the exposure step and tracks progress.

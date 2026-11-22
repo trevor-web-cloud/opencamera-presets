@@ -658,6 +658,19 @@ public class MainUI {
                         banner_layoutParams.setMargins(banner_margin_left, banner_margin_top, 0, 0);
                         calib_banner.setLayoutParams(banner_layoutParams);
                     }
+                    // PRESET-6: "set as base" button docked below the banner
+                    View calib_rebase = main_activity.findViewById(R.id.calib_rebase);
+                    if( calib_rebase != null ) {
+                        RelativeLayout.LayoutParams rebase_layoutParams = (RelativeLayout.LayoutParams)calib_rebase.getLayoutParams();
+                        rebase_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+                        rebase_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+                        rebase_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+                        rebase_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+                        int rebase_margin_top = (int)(208 * scale + 0.5f);
+                        int rebase_margin_left = (int)(8 * scale + 0.5f);
+                        rebase_layoutParams.setMargins(rebase_margin_left, rebase_margin_top, 0, 0);
+                        calib_rebase.setLayoutParams(rebase_layoutParams);
+                    }
                     PresetBar.refreshVisibility(main_activity);
                 }
             }

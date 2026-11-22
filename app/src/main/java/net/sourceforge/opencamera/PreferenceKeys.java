@@ -102,8 +102,13 @@ public class PreferenceKeys {
     public static final String PresetExposureTimePreferenceKeyPrefix = "preference_preset_exposure_time_";
     // PRESET-5: guided calibration re-shoot wizard state - see ui/PresetBar.java
     public static final String PresetCalibActivePreferenceKey = "preference_preset_calib_active";
-    public static final String PresetCalibBoxPreferenceKey = "preference_preset_calib_box";
     public static final String PresetCalibStepPreferenceKey = "preference_preset_calib_step";
+    // PRESET-6: calibration is no longer tied to a named preset; it brackets
+    // around an adjustable base (initially the current manual settings)
+    public static final String PresetCalibBaseISOPreferenceKey = "preference_preset_calib_base_iso";
+    public static final String PresetCalibBaseExposurePreferenceKey = "preference_preset_calib_base_exposure";
+    public static final String PresetCalibOrigISOPreferenceKey = "preference_preset_calib_orig_iso";
+    public static final String PresetCalibOrigExposurePreferenceKey = "preference_preset_calib_orig_exposure";
 
     public static final String RawPreferenceKey = "preference_raw";
 
