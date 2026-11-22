@@ -645,6 +645,19 @@ public class MainUI {
                         pill_layoutParams.setMargins(pill_margin_left, pill_margin_top, 0, 0);
                         preset_pill.setLayoutParams(pill_layoutParams);
                     }
+                    // PRESET-5: calibration banner docked below the pill
+                    View calib_banner = main_activity.findViewById(R.id.calib_banner);
+                    if( calib_banner != null ) {
+                        RelativeLayout.LayoutParams banner_layoutParams = (RelativeLayout.LayoutParams)calib_banner.getLayoutParams();
+                        banner_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+                        banner_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+                        banner_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+                        banner_layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0);
+                        int banner_margin_top = (int)(116 * scale + 0.5f);
+                        int banner_margin_left = (int)(8 * scale + 0.5f);
+                        banner_layoutParams.setMargins(banner_margin_left, banner_margin_top, 0, 0);
+                        calib_banner.setLayoutParams(banner_layoutParams);
+                    }
                     PresetBar.refreshVisibility(main_activity);
                 }
             }

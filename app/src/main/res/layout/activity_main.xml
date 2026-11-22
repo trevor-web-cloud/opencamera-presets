@@ -641,6 +641,14 @@
         android:visibility="gone"
         />
 
+    <!-- PRESET-5: calibration wizard banner, docked at the top below the preset pill by MainUI.layoutUI(); styled and wired in ui/PresetBar -->
+    <Button
+        android:id="@+id/calib_banner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        />
+
     <!-- PRESET-1: horizontally scrollable preset bar （控箱1, 控箱2, ...); buttons are built in code by ui/PresetBar, positioning is set in MainUI.layoutUI() -->
     <HorizontalScrollView
         android:id="@+id/preset_bar"

@@ -100,6 +100,10 @@ public class PreferenceKeys {
     public static final String PresetNamePreferenceKeyPrefix = "preference_preset_name_";
     public static final String PresetISOPreferenceKeyPrefix = "preference_preset_iso_";
     public static final String PresetExposureTimePreferenceKeyPrefix = "preference_preset_exposure_time_";
+    // PRESET-5: guided calibration re-shoot wizard state - see ui/PresetBar.java
+    public static final String PresetCalibActivePreferenceKey = "preference_preset_calib_active";
+    public static final String PresetCalibBoxPreferenceKey = "preference_preset_calib_box";
+    public static final String PresetCalibStepPreferenceKey = "preference_preset_calib_step";
 
     public static final String RawPreferenceKey = "preference_raw";
 

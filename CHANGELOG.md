@@ -3,6 +3,12 @@
 All notable changes to this fork. Upstream base: Open Camera 1.56.2 (commit 0dd4cbe).
 Dates are Asia/Taipei.
 
+## 1.56.2-preset5-release — 2026-11-22 (versionCode 102)
+
+- New: guided calibration re-shoot wizard for phone changes. A "Calibrate" button at the end of the preset bar walks through every preset that has saved values: ISO stays at the saved value while the exposure time steps through a fixed bracket (saved value, +0.5 EV, +1 EV, -0.5 EV, -1 EV; five shots per preset). A banner below the top pill shows the current preset and step; tap it to advance after each shot, long-press to end. Finishing or ending always restores the preset's exact saved values. Wizard state persists across rotation/restarts. Capture stays manual on purpose: the photographer keeps framing control for every shot, the app only changes the exposure step and tracks progress.
+- All wizard strings are localized (English / zh-rTW) like the rest of the preset bar.
+- Security pass before release (standing rule: every revision is scanned before the GitHub release): permission set and exported components identical to preset4-release, debuggable off, same release key, no sensitive APIs in the new code, secret scan and de-identification scan clean, APK URL set unchanged.
+
 ## 1.56.2-preset4-release — 2026-11-19 (versionCode 101)
 
 - Localization: all preset-bar strings moved to string resources and now follow the system language. English (default): "Box N", "Presets ▶", "+ Add", English toasts. Traditional Chinese (zh-rTW): unchanged wording. Other locales fall back to English.

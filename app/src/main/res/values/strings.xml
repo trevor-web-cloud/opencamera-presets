@@ -1124,4 +1124,16 @@
     <string name="preset_applied_toast">%1$s: %2$s</string>
     <string name="preset_auto_iso_toast">ISO is set to Auto: switch to a manual ISO and set the exposure first, then long-press to save</string>
     <string name="preset_saved_toast">Saved to %1$s: %2$s</string>
+    <string name="preset_calibrate">Calibrate</string>
+    <string name="preset_calib_none_toast">No preset has values yet: long-press a preset button to save values first</string>
+    <string name="preset_calib_banner">%1$s · shot %2$d/%3$d\nISO %4$s ·%5$s (%6$s)\nShoot, then tap here for the next shot (long-press to end)</string>
+    <string name="preset_calib_done_toast">Calibration shooting finished: send the photos from this session as one batch</string>
+    <string name="preset_calib_ended_toast">Calibration ended: preset values restored</string>
+    <string-array name="preset_calib_step_labels">
+        <item>saved value</item>
+        <item>+0.5 EV</item>
+        <item>+1 EV</item>
+        <item>-0.5 EV</item>
+        <item>-1 EV</item>
+    </string-array>
 </resources>
