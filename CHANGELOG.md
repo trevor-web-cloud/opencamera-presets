@@ -3,6 +3,11 @@
 All notable changes to this fork. Upstream base: Open Camera 1.56.2 (commit 0dd4cbe).
 Dates are Asia/Taipei.
 
+## 1.56.2-preset8-release — 2026-11-23 (versionCode 105)
+
+- Filename tags are now English-only, regardless of the UI language: the default tag is the canonical `_Box_<index+1>` (so a zh-rTW phone now produces `IMG_20261123_120000_Box_2.jpg` instead of `_控箱2`). A custom preset name is reduced to ASCII letters/digits/"_"/"-", and a custom name containing no ASCII letter falls back to `_Box_<index+1>`. The preset-match rule from preset7 is unchanged.
+- Security pass: permission set and exported components identical to preset7-release, debuggable off, same release key, no sensitive APIs in the changed code, secret and de-identification scans clean, APK URL set unchanged.
+
 ## 1.56.2-preset7-release — 2026-11-23 (versionCode 104)
 
 - New: photo filenames are tagged with the active preset, e.g. `IMG_20261123_120000_控箱2.jpg` (English locale: `_Box_2`). The tag is added only when a preset is active AND the currently set ISO + exposure time still exactly match that preset's stored values, so the filename never claims a preset the photo was not taken with; manually changing ISO/exposure after applying a preset drops the tag. The preset name is sanitized for filenames (invalid characters and spaces become "_"). Videos and burst sequences are not tagged.
