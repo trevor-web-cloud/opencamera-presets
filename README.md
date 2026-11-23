@@ -12,6 +12,7 @@ Built for a repetitive inspection workflow: several pieces of equipment each nee
 - **+ Add** appends another preset (Box N+1). The count and values persist in the app's preferences.
 - After a preset is applied, the bar **auto-collapses** to a small **"Presets ▶"** pill docked below the top toolbar, so it never blocks the preview or the focus point while framing. Tap the pill to expand the bar again; the **◀** button collapses it manually. The collapsed state persists across restarts.
 - Scope: a preset stores **ISO + exposure time only** (not white balance, focus, or other settings).
+- **Filename tag (preset7):** photos taken while a preset is applied are saved with the preset name appended, e.g. `IMG_20261123_120000_控箱2.jpg` (English: `_Box_2`). The tag appears only while the current ISO + exposure time still exactly match the preset's stored values; changing them manually after applying drops the tag, so a tagged filename is proof of the settings used. Videos and burst sequences are not tagged.
 
 ## Preference key convention (read this before parsing a settings backup)
 

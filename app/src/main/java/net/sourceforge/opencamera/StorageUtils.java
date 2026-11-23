@@ -682,6 +682,34 @@ public class StorageUtils {
         return result;
     }
 
+    /** PRESET-7: filename tag for the active preset, e.g. "_控箱2" (leading
+     *  underscore included). Returns "" unless a preset is active, that
+     *  preset has stored values, and the currently set ISO + exposure time
+     *  still exactly match the preset's stored values - so the tag only
+     *  claims a preset when the photo really is taken with its values
+     *  (manually changing ISO/exposure after applying a preset drops the
+     *  tag). The preset name is sanitized for filesystem use: characters
+     *  invalid in filenames and spaces become "_".
+     */
+    private String getPresetFilenameTag(SharedPreferences sharedPreferences) {
+        int active = sharedPreferences.getInt(PreferenceKeys.PresetActivePreferenceKey, -1);
+        if( active < 0 )
+            return "";
+        if( !sharedPreferences.contains(PreferenceKeys.PresetISOPreferenceKeyPrefix + active) )
+            return "";
+        String preset_iso = sharedPreferences.getString(PreferenceKeys.PresetISOPreferenceKeyPrefix + active, net.sourceforge.opencamera.cameracontroller.CameraController.ISO_DEFAULT);
+        long preset_exposure_time = sharedPreferences.getLong(PreferenceKeys.PresetExposureTimePreferenceKeyPrefix + active, net.sourceforge.opencamera.cameracontroller.CameraController.EXPOSURE_TIME_DEFAULT);
+        String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, net.sourceforge.opencamera.cameracontroller.CameraController.ISO_DEFAULT);
+        long current_exposure_time = sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, net.sourceforge.opencamera.cameracontroller.CameraController.EXPOSURE_TIME_DEFAULT);
+        if( !preset_iso.equals(current_iso) || preset_exposure_time != current_exposure_time )
+            return "";
+        String name = sharedPreferences.getString(PreferenceKeys.PresetNamePreferenceKeyPrefix + active, context.getString(R.string.preset_box_name, active + 1));
+        String tag = name.replaceAll("[\\\\/:*?\"<>|\\s\\p{Cntrl}]+", "_").replaceAll("^_+|_+$", "");
+        if( tag.length() == 0 )
+            return "";
+        return "_" + tag;
+    }
+
     String createMediaFilename(int type, String suffix, int count, String extension, Date current_date) {
         String index = "";
         if( count > 0 ) {
@@ -709,7 +737,8 @@ public class StorageUtils {
             case MEDIA_TYPE_PRESHOT: // preshot videos still use same prefix as photos
             case MEDIA_TYPE_IMAGE: {
                 String prefix = sharedPreferences.getString(PreferenceKeys.SavePhotoPrefixPreferenceKey, "IMG_");
-                mediaFilename = prefix + timeStamp + suffix + index + extension;
+                // PRESET-7: tag photos taken with an applied preset, e.g. IMG_20261123_120000_控箱2.jpg
+                mediaFilename = prefix + timeStamp + suffix + index + getPresetFilenameTag(sharedPreferences) + extension;
                 break;
             }
             case MEDIA_TYPE_VIDEO: {

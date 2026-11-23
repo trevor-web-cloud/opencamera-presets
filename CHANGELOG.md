@@ -3,6 +3,11 @@
 All notable changes to this fork. Upstream base: Open Camera 1.56.2 (commit 0dd4cbe).
 Dates are Asia/Taipei.
 
+## 1.56.2-preset7-release — 2026-11-23 (versionCode 104)
+
+- New: photo filenames are tagged with the active preset, e.g. `IMG_20261123_120000_控箱2.jpg` (English locale: `_Box_2`). The tag is added only when a preset is active AND the currently set ISO + exposure time still exactly match that preset's stored values, so the filename never claims a preset the photo was not taken with; manually changing ISO/exposure after applying a preset drops the tag. The preset name is sanitized for filenames (invalid characters and spaces become "_"). Videos and burst sequences are not tagged.
+- Security pass: permission set and exported components identical to preset6-release, debuggable off, same release key, no sensitive APIs in the changed code, secret and de-identification scans clean, APK URL set unchanged.
+
 ## 1.56.2-preset6-release — 2026-11-22 (versionCode 103)
 
 - Calibration wizard revised after on-device feedback: (1) no preset (box) name is designated any more — the wizard is a single run, not a walk through named presets, and the banner no longer shows a preset name; (2) the bracket base is adjustable — the wizard starts from the current manual ISO + exposure time (Auto ISO is rejected with a hint), and a new "Set as base" button below the banner re-bases the remaining steps on whatever values are currently dialed in with the normal exposure controls. Ending the wizard restores the settings as they were when it started.
