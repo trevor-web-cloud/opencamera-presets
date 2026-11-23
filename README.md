@@ -13,6 +13,24 @@ Built for a repetitive inspection workflow: several pieces of equipment each nee
 - After a preset is applied, the bar **auto-collapses** to a small **"Presets ▶"** pill docked below the top toolbar, so it never blocks the preview or the focus point while framing. Tap the pill to expand the bar again; the **◀** button collapses it manually. The collapsed state persists across restarts.
 - Scope: a preset stores **ISO + exposure time only** (not white balance, focus, or other settings).
 
+## Preference key convention (read this before parsing a settings backup)
+
+The fork's preset values live in the standard Open Camera preferences, so
+they appear in Settings-backup XML exports (`BACKUP_OC_*.xml`). The key
+suffix is the **zero-based index**, while the on-screen name is index + 1:
+
+| Key in backup file | Meaning |
+|---|---|
+| `preference_preset_iso_0` / `preference_preset_exposure_time_0` | Box 1 |
+| `preference_preset_iso_1` / `preference_preset_exposure_time_1` | Box 2 |
+| `preference_preset_iso_N` / `preference_preset_exposure_time_N` | Box N+1 |
+| `preference_preset_active` (int) | Active preset index (0-based; `1` = Box 2) |
+| `preference_preset_count` (int) | Preset count; only written after "+ Add" is used, otherwise the default of 4 applies and the key is absent from backups |
+| `preference_preset_name_N` | Optional custom name for Box N+1; absent means the localized default name |
+
+Exposure times are stored as nanoseconds (e.g. `100000000` = 1/10 s).
+Do not read the suffix as the box number: `_1` is Box 2, not Box 1.
+
 ## Install
 
 Download the APK from the [Releases](../../releases) page and sideload it.
