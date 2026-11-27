@@ -60,6 +60,19 @@ public class PresetBar {
         return "ISO " + iso + " ·" + exp_string;
     }
 
+    /** PRESET-9: the values currently selected on the camera (the live
+     *  preference_iso / preference_exposure_time), formatted like
+     *  describePreset. The active preset's button shows these instead of
+     *  its stored values, so after the user adjusts ISO/exposure manually
+     *  the button reflects what is actually in effect now, not the preset
+     *  that was applied earlier. */
+    private static String describeCurrent(MainActivity activity, SharedPreferences prefs) {
+        String iso = prefs.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
+        long exposure_time = prefs.getLong(PreferenceKeys.ExposureTimePreferenceKey, CameraController.EXPOSURE_TIME_DEFAULT);
+        String exp_string = activity.getPreview() != null ? activity.getPreview().getExposureTimeString(exposure_time) : "";
+        return "ISO " + iso + " ·" + exp_string;
+    }
+
     private static Button makeBarButton(MainActivity activity, String text, float scale, boolean active) {
         Button button = new Button(activity);
         button.setAllCaps(false);
@@ -113,7 +126,8 @@ public class PresetBar {
         int active = prefs.getInt(PreferenceKeys.PresetActivePreferenceKey, -1);
         for( int i = 0; i < count; i++ ) {
             final int index = i;
-            Button button = makeBarButton(activity, getPresetName(activity, prefs, index) + "\n" + describePreset(activity, prefs, index), scale, index == active);
+            // PRESET-9: the active preset's button shows the currently selected camera values; other buttons keep showing their stored preset values
+            Button button = makeBarButton(activity, getPresetName(activity, prefs, index) + "\n" + (index == active ? describeCurrent(activity, prefs) : describePreset(activity, prefs, index)), scale, index == active);
             button.setMinWidth((int)(84 * scale + 0.5f));
             button.setOnClickListener(new View.OnClickListener() {
                 @Override

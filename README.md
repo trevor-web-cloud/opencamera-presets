@@ -7,7 +7,7 @@ Built for a repetitive inspection workflow: several pieces of equipment each nee
 ## The preset bar
 
 - A horizontally scrollable bar of preset buttons sits above the shutter button: **Box 1, Box 2, Box 3, Box 4, ...** (named per equipment cabinet in the original use case; the label follows the system language, e.g. Traditional Chinese shows 控箱1, 控箱2, ...).
-- **Tap** a preset: applies its stored ISO and exposure time through the same code path as the built-in exposure menu, and highlights the active preset.
+- **Tap** a preset: applies its stored ISO and exposure time through the same code path as the built-in exposure menu, and highlights the active preset. The active preset's button shows the **currently selected** camera values (since preset9), so it stays truthful after manual adjustments; inactive buttons show their stored values.
 - **Long-press** a preset: stores the currently set manual ISO and exposure time into that button, so presets are calibrated on site. Saving is refused while ISO is set to Auto.
 - **+ Add** appends another preset (Box N+1). The count and values persist in the app's preferences.
 - After a preset is applied, the bar **auto-collapses** to a small **"Presets ▶"** pill docked below the top toolbar, so it never blocks the preview or the focus point while framing. Tap the pill to expand the bar again; the **◀** button collapses it manually. The collapsed state persists across restarts.

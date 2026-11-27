@@ -3132,6 +3132,9 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         magneticSensor.registerMagneticListener(mSensorManager); // check whether we need to register or unregister the magnetic listener
         magneticSensor.checkMagneticAccuracy();
 
+        // PRESET-9: settings changed - rebuild the preset bar so the active preset's button shows the currently selected values
+        net.sourceforge.opencamera.ui.PresetBar.build(this);
+
         if( MyDebug.LOG ) {
             Log.d(TAG, "updateForSettings: done: " + (System.currentTimeMillis() - debug_time));
         }

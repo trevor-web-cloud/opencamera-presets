@@ -3,6 +3,11 @@
 All notable changes to this fork. Upstream base: Open Camera 1.56.2 (commit 0dd4cbe).
 Dates are Asia/Taipei.
 
+## 1.56.2-preset9-release — 2026-11-27 (versionCode 106)
+
+- The active preset's button now shows the currently selected camera values (live ISO + exposure time) instead of always showing the preset's stored values: after applying a preset and then adjusting ISO/exposure manually, the button reflects what is actually in effect. Inactive buttons keep showing their stored values, so presets can still be compared before choosing. The bar rebuilds on every settings change (hooked into MainActivity.updateForSettings), so the display stays current.
+- Security pass: permission set and exported components identical to preset8-release, debuggable off, same release key, no sensitive APIs in the changed code, secret and de-identification scans clean, APK URL set unchanged.
+
 ## 1.56.2-preset8-release — 2026-11-23 (versionCode 105)
 
 - Filename tags are now English-only, regardless of the UI language: the default tag is the canonical `_Box_<index+1>` (so a zh-rTW phone now produces `IMG_20261123_120000_Box_2.jpg` instead of `_控箱2`). A custom preset name is reduced to ASCII letters/digits/"_"/"-", and a custom name containing no ASCII letter falls back to `_Box_<index+1>`. The preset-match rule from preset7 is unchanged.
