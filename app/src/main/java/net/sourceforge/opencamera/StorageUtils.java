@@ -682,33 +682,53 @@ public class StorageUtils {
         return result;
     }
 
-    /** PRESET-7/8: filename tag for the active preset, e.g. "_Box_2"
-     *  (leading underscore included). Returns "" unless a preset is active,
-     *  that preset has stored values, and the currently set ISO + exposure
-     *  time still exactly match the preset's stored values - so the tag
-     *  only claims a preset when the photo really is taken with its values
-     *  (manually changing ISO/exposure after applying a preset drops the
-     *  tag).
+    /** PRESET-7/8: filename tag for a preset, e.g. "_Box_2" (leading
+     *  underscore included).
      *  PRESET-8: filenames are English-only regardless of the UI language.
      *  The default tag is the canonical "Box_<index+1>"; a custom preset
      *  name is reduced to ASCII letters/digits/"_"/"-" (every other run of
      *  characters becomes "_"), and a custom name with no ASCII letter in
      *  it falls back to "Box_<index+1>".
+     *  PRESET-10: the tagged preset is chosen by VALUE MATCH across all
+     *  presets, not only via the "active" preset. Previously, dialing a
+     *  preset's exact ISO + exposure in manually (without tapping that
+     *  preset's button, so another preset stayed "active") produced no
+     *  tag even though the photo was taken with that preset's values.
+     *  Now: if the currently set ISO + exposure time exactly match a
+     *  preset's stored values, that preset's tag is used (the active
+     *  preset wins when several match). Values matching no preset still
+     *  produce no tag.
      */
+    /** PRESET-10: true if preset index has stored values and they exactly
+     *  equal the given current ISO + exposure time. */
+    private boolean presetValuesMatch(SharedPreferences sharedPreferences, int index, String current_iso, long current_exposure_time) {
+        if( !sharedPreferences.contains(PreferenceKeys.PresetISOPreferenceKeyPrefix + index) )
+            return false;
+        String preset_iso = sharedPreferences.getString(PreferenceKeys.PresetISOPreferenceKeyPrefix + index, net.sourceforge.opencamera.cameracontroller.CameraController.ISO_DEFAULT);
+        long preset_exposure_time = sharedPreferences.getLong(PreferenceKeys.PresetExposureTimePreferenceKeyPrefix + index, net.sourceforge.opencamera.cameracontroller.CameraController.EXPOSURE_TIME_DEFAULT);
+        return preset_iso.equals(current_iso) && preset_exposure_time == current_exposure_time;
+    }
+
     private String getPresetFilenameTag(SharedPreferences sharedPreferences) {
-        int active = sharedPreferences.getInt(PreferenceKeys.PresetActivePreferenceKey, -1);
-        if( active < 0 )
-            return "";
-        if( !sharedPreferences.contains(PreferenceKeys.PresetISOPreferenceKeyPrefix + active) )
-            return "";
-        String preset_iso = sharedPreferences.getString(PreferenceKeys.PresetISOPreferenceKeyPrefix + active, net.sourceforge.opencamera.cameracontroller.CameraController.ISO_DEFAULT);
-        long preset_exposure_time = sharedPreferences.getLong(PreferenceKeys.PresetExposureTimePreferenceKeyPrefix + active, net.sourceforge.opencamera.cameracontroller.CameraController.EXPOSURE_TIME_DEFAULT);
         String current_iso = sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, net.sourceforge.opencamera.cameracontroller.CameraController.ISO_DEFAULT);
         long current_exposure_time = sharedPreferences.getLong(PreferenceKeys.ExposureTimePreferenceKey, net.sourceforge.opencamera.cameracontroller.CameraController.EXPOSURE_TIME_DEFAULT);
-        if( !preset_iso.equals(current_iso) || preset_exposure_time != current_exposure_time )
+        int count = sharedPreferences.getInt(PreferenceKeys.PresetCountPreferenceKey, 4); // default mirrors PresetBar.DEFAULT_PRESET_COUNT
+        int active = sharedPreferences.getInt(PreferenceKeys.PresetActivePreferenceKey, -1);
+        int matched = -1;
+        if( active >= 0 && active < count && presetValuesMatch(sharedPreferences, active, current_iso, current_exposure_time) )
+            matched = active;
+        else {
+            for( int i = 0; i < count; i++ ) {
+                if( presetValuesMatch(sharedPreferences, i, current_iso, current_exposure_time) ) {
+                    matched = i;
+                    break;
+                }
+            }
+        }
+        if( matched < 0 )
             return "";
-        String fallback = "Box_" + (active + 1);
-        String custom_name = sharedPreferences.getString(PreferenceKeys.PresetNamePreferenceKeyPrefix + active, null);
+        String fallback = "Box_" + (matched + 1);
+        String custom_name = sharedPreferences.getString(PreferenceKeys.PresetNamePreferenceKeyPrefix + matched, null);
         if( custom_name == null )
             return "_" + fallback;
         String tag = custom_name.replaceAll("[^A-Za-z0-9_-]+", "_").replaceAll("^_+|_+$", "");

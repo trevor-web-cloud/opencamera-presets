@@ -16,6 +16,8 @@ import net.sourceforge.opencamera.PreferenceKeys;
 import net.sourceforge.opencamera.R;
 import net.sourceforge.opencamera.cameracontroller.CameraController;
 
+import java.lang.ref.WeakReference;
+
 /** PRESET-1: on-screen preset bar for quickly applying ISO + exposure time presets
  *  （控箱1, 控箱2, ...).
  *
@@ -32,6 +34,15 @@ import net.sourceforge.opencamera.cameracontroller.CameraController;
  *    "預設 ▶" pill so it never blocks the preview while framing; the "◀"
  *    button collapses it manually. Tap the pill to expand again. The
  *    collapsed state is persisted.
+ *  - PRESET-9: the active preset's button shows the currently selected
+ *    camera values instead of its stored values.
+ *  - PRESET-10: the pill also shows the currently selected values (with
+ *    the active preset's name), and the bar/pill refresh live: manual
+ *    ISO/exposure changes made with the app's own popup/sliders write
+ *    preference_iso / preference_exposure_time directly without going
+ *    through MainActivity.updateForSettings(), so v9's rebuild hook
+ *    there never fired for them. A SharedPreferences change listener
+ *    (ensurePrefsListener) now rebuilds on any relevant key change.
  */
 public class PresetBar {
     private static final String TAG = "PresetBar";
@@ -95,8 +106,50 @@ public class PresetBar {
         return button;
     }
 
+    // PRESET-10: live-refresh plumbing (see class header). The listener is
+    // held in a static field because SharedPreferences only keeps a weak
+    // reference to listeners.
+    private static WeakReference<MainActivity> current_activity;
+    private static SharedPreferences.OnSharedPreferenceChangeListener prefs_listener;
+    private static SharedPreferences listened_prefs;
+
+    private static void ensurePrefsListener(final MainActivity activity) {
+        current_activity = new WeakReference<>(activity);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        if( prefs_listener != null && listened_prefs == prefs )
+            return;
+        if( prefs_listener != null && listened_prefs != null )
+            listened_prefs.unregisterOnSharedPreferenceChangeListener(prefs_listener);
+        prefs_listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if( key == null )
+                    return;
+                if( key.equals(PreferenceKeys.ISOPreferenceKey)
+                        || key.equals(PreferenceKeys.ExposureTimePreferenceKey)
+                        || key.equals(PreferenceKeys.PresetActivePreferenceKey)
+                        || key.startsWith(PreferenceKeys.PresetISOPreferenceKeyPrefix)
+                        || key.startsWith(PreferenceKeys.PresetExposureTimePreferenceKeyPrefix)
+                        || key.startsWith(PreferenceKeys.PresetNamePreferenceKeyPrefix) ) {
+                    final MainActivity a = current_activity != null ? current_activity.get() : null;
+                    if( a != null ) {
+                        a.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                build(a);
+                            }
+                        });
+                    }
+                }
+            }
+        };
+        listened_prefs = prefs;
+        prefs.registerOnSharedPreferenceChangeListener(prefs_listener);
+    }
+
     /** (Re)builds all preset buttons inside R.id.preset_container. Safe to call repeatedly. */
     public static void build(final MainActivity activity) {
+        ensurePrefsListener(activity);
         LinearLayout container = activity.findViewById(R.id.preset_container);
         if( container == null )
             return;
@@ -175,6 +228,7 @@ public class PresetBar {
      *  lives outside the scrollable bar so it can sit up in the top toolbar
      *  area, clear of the preview. Safe to call repeatedly. */
     public static void refreshVisibility(final MainActivity activity) {
+        ensurePrefsListener(activity);
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         boolean collapsed = prefs.getBoolean(PreferenceKeys.PresetBarCollapsedPreferenceKey, false);
         View bar = activity.findViewById(R.id.preset_bar);
@@ -195,6 +249,14 @@ public class PresetBar {
             bg.setCornerRadius(8 * scale);
             bg.setColor(0xB3000000);
             pill.setBackground(bg);
+            // PRESET-10: the pill shows the currently selected values (with
+            // the active preset's name when one is active), not just the
+            // static "Presets" label - after choosing a preset the bar
+            // auto-collapses, so the pill is what the user actually sees.
+            int active = prefs.getInt(PreferenceKeys.PresetActivePreferenceKey, -1);
+            String pill_label = activity.getString(R.string.preset_pill).replace("▶", "").trim();
+            String head = (active >= 0 && active < getPresetCount(prefs)) ? getPresetName(activity, prefs, active) : pill_label;
+            pill.setText(head + " " + describeCurrent(activity, prefs) + " ▶");
             pill.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

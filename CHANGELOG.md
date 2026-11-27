@@ -3,6 +3,13 @@
 All notable changes to this fork. Upstream base: Open Camera 1.56.2 (commit 0dd4cbe).
 Dates are Asia/Taipei.
 
+## 1.56.2-preset10-release — 2026-11-27 (versionCode 107)
+
+- Filename tag now chosen by value match across ALL presets, not only the "active" one: if the currently set ISO + exposure time exactly match a preset's stored values, that preset's tag is used (the active preset wins when several match). Previously, dialing a preset's exact values in manually — without tapping that preset's button, so another preset stayed "active" — produced no tag even though the photo was taken with that preset's values (on-device report: values matching Box 4 got no `_Box_4` tag). Values matching no preset still produce no tag.
+- The collapsed pill now shows the currently selected values (with the active preset's name when one is active), e.g. "Box 4 ISO 100 ·1/50 ▶", instead of only the static "Presets ▶" label — after choosing a preset the bar auto-collapses, so the pill is what is actually seen.
+- Live refresh: manual ISO/exposure changes made with the app's own popup/sliders write preference_iso / preference_exposure_time directly and bypass MainActivity.updateForSettings(), so the preset9 rebuild hook never fired for them. A SharedPreferences change listener now rebuilds the bar/pill on any relevant key change.
+- Security pass: permission set identical to preset9-release, debuggable off, same release key, secret and de-identification scans clean.
+
 ## 1.56.2-preset9-release — 2026-11-27 (versionCode 106)
 
 - The active preset's button now shows the currently selected camera values (live ISO + exposure time) instead of always showing the preset's stored values: after applying a preset and then adjusting ISO/exposure manually, the button reflects what is actually in effect. Inactive buttons keep showing their stored values, so presets can still be compared before choosing. The bar rebuilds on every settings change (hooked into MainActivity.updateForSettings), so the display stays current.
