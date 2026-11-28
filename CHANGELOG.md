@@ -3,6 +3,8 @@
 All notable changes to this fork. Upstream base: Open Camera 1.56.2 (commit 0dd4cbe).
 Dates are Asia/Taipei.
 
+Note (2026-11-28): the GitHub release tags for preset4–preset9 were zero-padded (now v1.56.2-preset04-release … v1.56.2-preset09-release) because GitHub sorts the releases list lexicographically and ranked "preset9" above "preset10". The app versionNames recorded in the headings below are unchanged.
+
 ## 1.56.2-preset10-release — 2026-11-27 (versionCode 107)
 
 - Filename tag now chosen by value match across ALL presets, not only the "active" one: if the currently set ISO + exposure time exactly match a preset's stored values, that preset's tag is used (the active preset wins when several match). Previously, dialing a preset's exact values in manually — without tapping that preset's button, so another preset stayed "active" — produced no tag even though the photo was taken with that preset's values (on-device report: values matching Box 4 got no `_Box_4` tag). Values matching no preset still produce no tag.
